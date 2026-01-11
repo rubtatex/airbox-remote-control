@@ -1,0 +1,116 @@
+.wifi-status {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 240px;
+}
+
+.wifi-status.loading {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.wifi-status.connected {
+  border-color: var(--success);
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.wifi-status.disconnected {
+  border-color: var(--warning);
+  background: rgba(255, 152, 0, 0.05);
+}
+
+.wifi-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.wifi-icon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.wifi-status.connected .wifi-icon {
+  color: var(--success);
+}
+
+.wifi-status.disconnected .wifi-icon {
+  color: var(--warning);
+}
+
+.wifi-info {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.wifi-ssid {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wifi-signal {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.wifi-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.wifi-bar {
+  width: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.2s ease;
+}
+
+.wifi-status.connected .wifi-bar.active {
+  background: var(--success);
+}
+
+.wifi-status.disconnected .wifi-bar.active {
+  background: var(--warning);
+}
+
+.wifi-rssi {
+  font-family: 'Courier New', monospace;
+}
+
+.wifi-ip {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .wifi-status {
+    min-width: auto;
+    flex-shrink: 0;
+    padding: 10px 12px;
+  }
+
+  .wifi-ssid {
+    font-size: 12px;
+  }
+
+  .wifi-ip {
+    display: none;
+  }
+}

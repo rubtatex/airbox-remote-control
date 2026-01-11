@@ -1,0 +1,110 @@
+.relay-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+}
+
+.relay-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.relay-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.relay-card.on {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+  border-color: var(--success);
+  color: var(--success);
+  box-shadow: 0 0 16px rgba(76, 175, 80, 0.2);
+}
+
+.relay-card.off {
+  background: rgba(153, 153, 153, 0.03);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.relay-card.closed {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+  border-color: #f44336;
+  color: #f44336;
+  box-shadow: 0 0 16px rgba(244, 67, 54, 0.2);
+}
+
+.relay-icon {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
+.relay-card:hover .relay-icon,
+.relay-card.on .relay-icon {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.relay-status {
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.relay-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  text-transform: none;
+}
+
+.relay-card-name {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.relay-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-transform: none;
+}
+
+.relay-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+  background: var(--surface-light);
+}
+
+.relay-chip.subtle {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.relay-chip.muted {
+  color: var(--text-secondary);
+  border-style: dashed;
+}
