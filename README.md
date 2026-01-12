@@ -200,6 +200,7 @@ Once a loop is created:
 
 #### Program JSON Format
 
+Basic structure:
 ```json
 {
   "id": "unique-id",
@@ -224,6 +225,81 @@ Once a loop is created:
       "durationType": "random",
       "durationMin": 10,
       "durationMax": 20
+    }
+  ]
+}
+```
+
+Complete example with loop:
+```json
+{
+  "id": "9ccb1547-0c34-4ddf-82e2-799b72142cd5",
+  "name": "Test",
+  "enabled": true,
+  "steps": [
+    {
+      "id": "0aa7b549-ce33-40b7-9527-b9eecbf615ac",
+      "type": "loop",
+      "iterations": 2,
+      "loopSteps": [
+        {
+          "id": "36e89f09-33f1-4eaa-a301-e99790c8f74a",
+          "type": "relay",
+          "relay": 2,
+          "action": "ON"
+        },
+        {
+          "id": "8f95a65a-ce01-413f-a635-5a68d0423d97",
+          "type": "relay",
+          "relay": 3,
+          "action": "ON"
+        },
+        {
+          "id": "de251464-0244-4373-ab1c-46e5951d7c72",
+          "type": "relay",
+          "relay": 1,
+          "action": "ON"
+        },
+        {
+          "id": "6e8685cf-e30f-42d8-943b-5cafdd5a4e42",
+          "type": "wait",
+          "durationType": "random",
+          "durationMin": 15,
+          "durationMax": 30
+        },
+        {
+          "id": "722eab3f-0844-4d21-a448-1081ba4e1130",
+          "type": "relay",
+          "relay": 1,
+          "action": "OFF"
+        },
+        {
+          "id": "cb4ca51f-a7ee-4e9a-b824-3c7b08033a11",
+          "type": "wait",
+          "durationType": "random",
+          "durationMin": 10,
+          "durationMax": 20
+        },
+        {
+          "id": "5591903c-2766-4700-aa55-a0a636fce79e",
+          "type": "relay",
+          "relay": 2,
+          "action": "OFF"
+        },
+        {
+          "id": "db236dd4-c81e-4376-a8cf-7d432c7f106b",
+          "type": "relay",
+          "relay": 3,
+          "action": "OFF"
+        },
+        {
+          "id": "8f984e19-5ee0-4e82-b7ec-ee6d18c581f2",
+          "type": "wait",
+          "durationType": "random",
+          "durationMin": 45,
+          "durationMax": 90
+        }
+      ]
     }
   ]
 }
@@ -271,6 +347,25 @@ Once a loop is created:
 
 4. **Push to main** - Automatic deployment via workflow
 
+> ⚠️ **IMPORTANT: GitHub Pages + ESP32 Connection**
+> 
+> GitHub Pages is served over HTTPS. Browsers block direct HTTP requests to your local ESP32 (mixed content policy). To control your ESP32 from GitHub Pages, you **must** use an HTTPS reverse proxy:
+> 
+> **Setup with Tailscale Funnel (Recommended):**
+> 1. Install Tailscale on your device: https://tailscale.com/download
+> 2. Authenticate and join your tailnet
+> 3. Enable Funnel on your machine:
+>    ```bash
+>    tailscale funnel 80
+>    ```
+> 4. Tailscale generates a public HTTPS URL (e.g., `https://airbox-machine.tail-abc123.ts.net`)
+> 5. Use this URL in app settings as your ESP endpoint
+> 6. The app connects securely via HTTPS through Tailscale's infrastructure
+>
+> **Benefits:** Free tier, encrypted VPN, simple setup, automatic HTTPS with valid certificates
+>
+> **For local testing only:** Run `npm run dev -- --host` and access via HTTP on your network
+
 ### Manual Deployment
 
 ```bash
@@ -280,12 +375,56 @@ npm run deploy
 
 ### Self-Hosting
 
-Build and serve the `dist/` folder with any static file server:
+For complete control and custom domain:
 
-```bash
-npm run build
-# Copy dist/ to your server
-```
+1. **Build the project**
+   ```bash
+   npm run build
+   ```
+
+2. **Setup HTTPS reverse proxy** (required for GitHub Pages integration)
+   
+   Use nginx, Apache, or a tunnel service to:
+   - Terminate TLS/SSL with a valid certificate
+   - Proxy HTTPS requests to your ESP32's HTTP server
+   - Handle CORS headers properly
+   
+   **Nginx example:**
+   ```nginx
+   server {
+       listen 443 ssl http2;
+       server_name airbox.yourdomain.com;
+       
+       ssl_certificate /path/to/cert.pem;
+       ssl_certificate_key /path/to/key.pem;
+       
+       # Serve the React app
+       location / {
+           alias /var/www/airbox-remote-control/dist/;
+           try_files $uri $uri/ /index.html;
+       }
+       
+       # Proxy ESP32 API calls
+       location /api/ {
+           proxy_pass http://192.168.1.x:80/;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           add_header 'Access-Control-Allow-Origin' '*' always;
+           add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+           add_header 'Access-Control-Allow-Headers' 'Content-Type' always;
+       }
+   }
+   ```
+
+3. **Configure the app**
+   - Update API endpoint in app settings to `https://airbox.yourdomain.com/api`
+
+4. **Host the dist/ folder**
+   - Upload to your server
+   - Keep running the reverse proxy
+   - Access via your custom domain
+
+**Benefits:** Full control, custom domain, integrates with any DNS provider
 
 ## 🔌 ESP32 API Endpoints
 
