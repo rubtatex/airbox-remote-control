@@ -2,7 +2,9 @@
 
 A modern, responsive web interface for controlling ESP32-based relay systems with advanced automation features. Built with React, TypeScript, and Vite.
 
-> 💡 **Live Demo** - Try it at: [https://rubtatex.github.io/airbox-remote-control](https://rubtatex.github.io/airbox-remote-control)
+**📱 Progressive Web App (PWA)** - Install on your iPhone or Android for offline access and a native app experience!
+
+> 🚀 **Try the live demo**: [http://tools.rubtatex.eu/airbox/](http://tools.rubtatex.eu/airbox/)
 
 ## ✨ Features
 
@@ -39,15 +41,24 @@ A modern, responsive web interface for controlling ESP32-based relay systems wit
 - **Responsive Design** - Optimized for mobile and desktop
 - **Dark Theme** - Modern dark UI with subtle animations
 - **Action History** - Track all relay operations with timestamps
-- **WiFi Management** - Configure ESP32 WiFi settings
+- **WiFi Management** - Configure Airbox WiFi settings
 - **Easy Onboarding** - Simple initial setup wizard
+
+### Progressive Web App (PWA)
+- **📲 Install on Home Screen** - Works on iOs and Android
+- **📡 Offline Mode** - Control Airbox in AP mode without internet
+- **⚡ Fast Loading** - Cached assets for instant access
+- **💾 1-Hour Cache** - API responses cached for local control
+- **🔄 Auto Updates** - Service Worker updates in background
+- **📲 Native Feel** - Fullscreen, no browser UI (standalone mode)
 
 ### Technical Features
 - **Local Storage** - All settings saved in browser
-- **API Integration** - RESTful communication with ESP32
+- **API Integration** - RESTful communication with Airbox
 - **Type Safety** - Full TypeScript implementation
 - **Real-time Updates** - WebSocket-ready architecture
 - **Offline First** - Program editing works offline
+- **Service Worker** - Background sync and offline capabilities
 
 ## 📋 Prerequisites
 
@@ -94,7 +105,7 @@ airbox-remote-control/
 │   ├── App.css                      # Global styles
 │   ├── i18n.tsx                     # Translation system
 │   ├── pages/
-│   │   ├── Onboarding.tsx           # Initial ESP32 setup
+│   │   ├── Onboarding.tsx           # Initial Airbox setup
 │   │   ├── Dashboard.tsx            # Main control interface
 │   │   ├── Schedule.tsx             # Program editor
 │   │   ├── ActionHistory.tsx        # Action logs
@@ -105,7 +116,7 @@ airbox-remote-control/
 │   │   ├── WiFiStatus.tsx           # WiFi indicator
 │   │   └── LanguageSwitcher.tsx     # Language selector
 │   ├── services/
-│   │   └── api.ts                   # ESP32 API client
+│   │   └── api.ts                   # Airbox API client
 │   └── styles/                      # Component styles
 ├── public/                          # Static assets
 ├── vite.config.ts                   # Vite configuration
@@ -118,7 +129,7 @@ airbox-remote-control/
 ### Initial Setup
 
 1. **Launch the app** - Access via browser
-2. **Enter ESP32 IP** - Use `192.168.4.1` for AP mode or your network IP
+2. **Enter Airbox IP** - Use `192.168.4.1` for AP mode or your network IP
 3. **Connect** - App will verify connection
 4. **Start controlling** - Dashboard loads automatically
 
@@ -330,103 +341,125 @@ Complete example with loop:
 
 ## 🌐 Deployment
 
-### GitHub Pages (Automated)
+### 📲 iPhone/Mobile Installation (PWA)
 
-1. **Fork/Clone repository** to your GitHub account
+1. **Access the web app** on your device:
+   - Via the live demo**: [http://tools.rubtatex.eu/airbox/](http://tools.rubtatex.eu/airbox/)
    
-2. **Update `package.json`**
-   ```json
-   {
-     "homepage": "https://yourusername.github.io/airbox-remote-control"
-   }
+2. **Install on Home Screen**:
+   - **iPhone**: Tap **Share** → **Add to Home Screen**
+   - **Android**: Tap **Menu** → **Install app**
+   
+3. **Enjoy offline access**:
+   - App works offline in Airbox AP mode
+   - 1-hour cache for API responses
+   - Native fullscreen experience
+
+### Deploy on your web server
+
+1. Go to **Releases** on your GitHub repo
+2. Download the latest `airbox-control-build.zip`
+3. Extract files to your web server
+4. Access via your domain
+
+
+### Self-Hosting Setup
+
+#### Basic HTTP (Local Network)
+
+1. **Extract released ZIP** to your server directory
+2. **Serve files** via any web server:
+   ```bash
+   # Using Python
+   python -m http.server 8000 --directory dist
+   
+   # Using Node.js
+   npx serve dist
+   
+   # Using nginx
+   # See config below
    ```
+3. **Access the app** at `http://your-server:port`
 
-3. **Enable GitHub Pages**
-   - Repository Settings → Pages
-   - Source: **GitHub Actions**
+#### HTTPS (Recommended)
 
-4. **Push to main** - Automatic deployment via workflow
+For secure connections and remote access:
 
-> ⚠️ **IMPORTANT: GitHub Pages + ESP32 Connection**
-> 
-> GitHub Pages is served over HTTPS. Browsers block direct HTTP requests to your local ESP32 (mixed content policy). To control your ESP32 from GitHub Pages, you **must** use an HTTPS reverse proxy:
-> 
-> **Setup with Tailscale Funnel (Recommended):**
-> 1. Install Tailscale on your device: https://tailscale.com/download
-> 2. Authenticate and join your tailnet
-> 3. Enable Funnel on your machine:
->    ```bash
->    tailscale funnel 80
->    ```
-> 4. Tailscale generates a public HTTPS URL (e.g., `https://airbox-machine.tail-abc123.ts.net`)
-> 5. Use this URL in app settings as your ESP endpoint
-> 6. The app connects securely via HTTPS through Tailscale's infrastructure
->
-> **Benefits:** Free tier, encrypted VPN, simple setup, automatic HTTPS with valid certificates
->
-> **For local testing only:** Run `npm run dev -- --host` and access via HTTP on your network
+**Option 1: Tailscale Funnel (Easiest)**
+```bash
+# Install Tailscale: https://tailscale.com
+tailscale funnel 80  # Automatically provides HTTPS URL
+```
 
-### Manual Deployment
+**Option 2: Let's Encrypt + Nginx**
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name airbox.yourdomain.com;
+    
+    ssl_certificate /etc/letsencrypt/live/airbox.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/airbox.yourdomain.com/privkey.pem;
+    
+    # Serve the React app
+    location / {
+        alias /var/www/airbox/dist/;
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Proxy Airbox API calls
+    location /api/ {
+        proxy_pass http://192.168.1.x:80/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type';
+    }
+}
+```
+
+**Option 3: Docker**
+```dockerfile
+FROM nginx:alpine
+
+COPY dist/ /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+```
 
 ```bash
+docker build -t airbox .
+docker run -p 80:80 airbox
+```
+
+### Development Workflow
+
+1. **Make changes** in your editor
+2. **Run dev server**:
+   ```bash
+   npm run dev
+   ```
+3. **Test locally** at `http://localhost:5173/airbox/`
+4. **Test PWA** features (install, offline mode)
+5. **Commit changes** to GitHub
+6. **Workflow auto-builds** and creates release
+7. **Download** and deploy the ZIP
+
+### Build Manually
+
+```bash
+npm install
 npm run build
+
+# Preview build locally
+npm run preview
+
+# Manually deploy (update homepage in package.json first)
 npm run deploy
 ```
 
-### Self-Hosting
-
-For complete control and custom domain:
-
-1. **Build the project**
-   ```bash
-   npm run build
-   ```
-
-2. **Setup HTTPS reverse proxy** (required for GitHub Pages integration)
-   
-   Use nginx, Apache, or a tunnel service to:
-   - Terminate TLS/SSL with a valid certificate
-   - Proxy HTTPS requests to your ESP32's HTTP server
-   - Handle CORS headers properly
-   
-   **Nginx example:**
-   ```nginx
-   server {
-       listen 443 ssl http2;
-       server_name airbox.yourdomain.com;
-       
-       ssl_certificate /path/to/cert.pem;
-       ssl_certificate_key /path/to/key.pem;
-       
-       # Serve the React app
-       location / {
-           alias /var/www/airbox-remote-control/dist/;
-           try_files $uri $uri/ /index.html;
-       }
-       
-       # Proxy ESP32 API calls
-       location /api/ {
-           proxy_pass http://192.168.1.x:80/;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           add_header 'Access-Control-Allow-Origin' '*' always;
-           add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
-           add_header 'Access-Control-Allow-Headers' 'Content-Type' always;
-       }
-   }
-   ```
-
-3. **Configure the app**
-   - Update API endpoint in app settings to `https://airbox.yourdomain.com/api`
-
-4. **Host the dist/ folder**
-   - Upload to your server
-   - Keep running the reverse proxy
-   - Access via your custom domain
-
-**Benefits:** Full control, custom domain, integrates with any DNS provider
-
-## 🔌 ESP32 API Endpoints
+## 🔌 Airbox API Endpoints
 
 The application uses these REST endpoints:
 
@@ -519,14 +552,14 @@ Edit `src/i18n.tsx` - add new keys to both `fr` and `en` objects.
 
 ### Connection Issues
 
-**"Unable to connect to ESP32"**
-- ✅ Verify ESP32 is powered on
+**"Unable to connect to Airbox"**
+- ✅ Verify Airbox is powered on
 - ✅ Check IP address is correct
 - ✅ Ensure HTTP port 80 is accessible
 - ✅ Try accessing `http://<ip>/state` directly
 
 **"CORS Error"**
-- ESP32 must send proper CORS headers
+- Airbox must send proper CORS headers
 - Test endpoint in browser first
 
 ### Program Issues
@@ -570,6 +603,3 @@ MIT License - See LICENSE file for details
 
 Contributions welcome! Please open issues or pull requests.
 
----
-
-**AirBox Control** - Professional ESP32 relay automation 🚀⚡
